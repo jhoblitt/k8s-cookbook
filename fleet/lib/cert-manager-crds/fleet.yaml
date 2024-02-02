@@ -1,0 +1,9 @@
+---
+defaultNamespace: cert-manager
+labels:
+  bundle: &name cert-manager-crds
+# https://github.com/rancher/fleet/issues/1285
+helm:
+  releaseName: *name
+  atomic: true
+  force: true

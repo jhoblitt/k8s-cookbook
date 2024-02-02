@@ -1,0 +1,38 @@
+---
+defaultNamespace: cert-manager
+labels:
+  bundle: &name cert-manager-conf
+helm:
+  releaseName: *name
+  atomic: true
+  takeOwnership: true
+  force: true
+dependsOn:
+  - selector:
+      matchLabels:
+        bundle: cert-manager
+targetCustomizations:
+  - name: dev
+    clusterSelector:
+      matchLabels:
+        site: dev
+    kustomize:
+      dir: overlays/dev
+  - name: tu
+    clusterSelector:
+      matchLabels:
+        site: tu
+    kustomize:
+      dir: overlays/tu
+  - name: ls
+    clusterSelector:
+      matchLabels:
+        site: ls
+    kustomize:
+      dir: overlays/ls
+  - name: cp
+    clusterSelector:
+      matchLabels:
+        site: cp
+    kustomize:
+      dir: overlays/cp

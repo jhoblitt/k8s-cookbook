@@ -1,0 +1,17 @@
+---
+defaultNamespace: &name cert-manager
+labels:
+  bundle: *name
+helm:
+  chart: *name
+  releaseName: *name
+  repo: https://charts.jetstack.io
+  version: v1.12.2
+  values:
+    installCRDs: false
+  timeoutSeconds: 300
+  atomic: true
+dependsOn:
+  - selector:
+      matchLabels:
+        bundle: cert-manager-crds
