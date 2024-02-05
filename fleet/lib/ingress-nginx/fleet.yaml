@@ -1,0 +1,51 @@
+---
+defaultNamespace: &name ingress-nginx
+labels:
+  bundle: *name
+helm:
+  chart: *name
+  releaseName: *name
+  repo: https://kubernetes.github.io/ingress-nginx
+  version: v4.5.2
+  values:
+    controller:
+      kind: DaemonSet
+    rbac:
+      create: true
+dependsOn:
+  - selector:
+      matchLabels:
+        bundle: metallb
+targetCustomizations:
+  - name: kueyen
+    clusterName: kueyen
+    helm:
+      values:
+        controller:
+          service:
+            annotations:
+              metallb.universe.tf/address-pool: ingress
+  - name: ruka
+    clusterName: ruka
+    helm:
+      values:
+        controller:
+          service:
+            annotations:
+              metallb.universe.tf/loadBalancerIPs: 139.229.134.150
+  - name: ayekan
+    clusterName: ayekan
+    helm:
+      values:
+        controller:
+          service:
+            annotations:
+              metallb.universe.tf/loadBalancerIPs: 139.229.144.39
+  - name: namkueyen
+    clusterName: namkueyen
+    helm:
+      values:
+        controller:
+          service:
+            annotations:
+              metallb.universe.tf/loadBalancerIPs: 139.229.134.210
