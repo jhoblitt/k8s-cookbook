@@ -1,0 +1,13 @@
+---
+defaultNamespace: kyverno
+labels:
+  bundle: &name kyverno-conf
+helm:
+  releaseName: *name
+  atomic: true
+  takeOwnership: true
+  force: true
+dependsOn:
+  - selector:
+      matchLabels:
+        bundle: kyverno
