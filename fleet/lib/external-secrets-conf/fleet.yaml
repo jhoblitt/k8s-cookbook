@@ -1,0 +1,19 @@
+---
+defaultNamespace: external-secrets
+labels:
+  bundle: &name external-secrets-conf
+helm:
+  releaseName: *name
+  atomic: true
+dependsOn:
+  - selector:
+      matchLabels:
+        bundle: external-secrets
+targetCustomizations:
+  - name: dev
+    clusterSelector:
+      matchLabels:
+        site: dev
+    yaml:
+      overlays:
+        - dev
