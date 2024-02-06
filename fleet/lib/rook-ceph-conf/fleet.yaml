@@ -1,0 +1,19 @@
+---
+defaultNamespace: rook-ceph
+labels:
+  bundle: &name rook-ceph-conf
+helm:
+  releaseName: *name
+  atomic: false
+  takeOwnership: true
+  timeoutSeconds: 1800
+dependsOn:
+  - selector:
+      matchLabels:
+        bundle: rook-ceph-cluster
+targetCustomizations:
+  - name: kueyen
+    clusterName: kueyen
+    yaml:
+      overlays:
+        - kueyen
