@@ -1,0 +1,15 @@
+---
+defaultNamespace: velero
+labels:
+  bundle: &name velero-conf
+helm:
+  releaseName: *name
+  atomic: true
+targetCustomizations:
+  - name: dev
+    clusterSelector:
+      matchLabels:
+        site: dev
+    yaml:
+      overlays:
+        - dev

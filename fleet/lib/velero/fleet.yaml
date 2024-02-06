@@ -1,0 +1,17 @@
+---
+defaultNamespace: &name velero
+labels:
+  bundle: *name
+helm:
+  chart: *name
+  releaseName: *name
+  repo: https://vmware-tanzu.github.io/helm-charts
+  version: 4.1.0
+  valuesFiles:
+    - values.yaml
+  timeoutSeconds: 300
+  #atomic: true
+dependsOn:
+  - selector:
+      matchLabels:
+        bundle: velero-conf  # secret should be configured before chart
