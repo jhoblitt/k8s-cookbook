@@ -1,0 +1,25 @@
+---
+apiVersion: fleet.cattle.io/v1alpha1
+kind: GitRepo
+metadata:
+  name: kueyen
+  namespace: fleet-default
+spec:
+  repo: https://github.com/lsst-it/k8s-cookbook
+  branch: master
+  keepResources: true
+  paths:
+    - fleet/lib/cert-manager*
+    - fleet/lib/external-secrets*
+    - fleet/lib/ingress-nginx
+    - fleet/lib/kube-prometheus-stack
+    - fleet/lib/kyverno*
+    - fleet/lib/metallb*
+    - fleet/lib/multus*
+    - fleet/lib/rook-ceph*
+    - fleet/lib/velero*
+  targets:
+    - name: kueyen
+      clusterName: kueyen
+  correctDrift:
+    enabled: true
