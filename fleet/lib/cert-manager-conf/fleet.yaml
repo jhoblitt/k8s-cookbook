@@ -11,6 +11,9 @@ dependsOn:
   - selector:
       matchLabels:
         bundle: cert-manager
+  - selector:
+      matchLabels:
+        bundle: external-secrets-conf
 targetCustomizations:
   - name: dev
     clusterSelector:
