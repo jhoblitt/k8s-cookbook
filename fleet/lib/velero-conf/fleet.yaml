@@ -5,6 +5,10 @@ labels:
 helm:
   releaseName: *name
   atomic: true
+dependsOn:
+  - selector:
+      matchLabels:
+        bundle: external-secrets-conf
 targetCustomizations:
   - name: dev
     clusterSelector:
