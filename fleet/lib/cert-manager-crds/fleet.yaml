@@ -7,3 +7,4 @@ helm:
   releaseName: *name
   atomic: true
   force: true
+  takeOwnership: true
