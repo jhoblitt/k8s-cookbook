@@ -9,5 +9,5 @@ helm:
   version: v1.11.2
   valuesFiles:
     - values.yaml
-  timeoutSeconds: 1800
+  timeoutSeconds: 3600
   atomic: true

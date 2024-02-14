@@ -6,7 +6,7 @@ helm:
   releaseName: *name
   atomic: false
   takeOwnership: true
-  timeoutSeconds: 1800
+  timeoutSeconds: 3600
 dependsOn:
   - selector:
       matchLabels:
