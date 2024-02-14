@@ -1,0 +1,18 @@
+---
+apiVersion: fleet.cattle.io/v1alpha1
+kind: GitRepo
+metadata:
+  name: ayekan
+  namespace: fleet-default
+spec:
+  repo: https://github.com/lsst-it/k8s-cookbook
+  branch: master
+  keepResources: true
+  paths:
+    - fleet/lib/cert-manager*
+    - fleet/lib/external-secrets*
+  targets:
+    - name: ayekan
+      clusterName: ayekan
+  correctDrift:
+    enabled: true
