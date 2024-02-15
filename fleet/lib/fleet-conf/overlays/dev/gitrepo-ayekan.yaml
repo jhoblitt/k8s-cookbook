@@ -13,6 +13,7 @@ spec:
     - fleet/lib/external-secrets*
     - fleet/lib/metallb*
     - fleet/lib/ingress-nginx*
+    - fleet/lib/kyverno*
   targets:
     - name: ayekan
       clusterName: ayekan
