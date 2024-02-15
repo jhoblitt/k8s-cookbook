@@ -11,6 +11,7 @@ spec:
   paths:
     - fleet/lib/cert-manager*
     - fleet/lib/external-secrets*
+    - fleet/lib/metallb*
   targets:
     - name: ayekan
       clusterName: ayekan
