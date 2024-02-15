@@ -17,3 +17,8 @@ targetCustomizations:
     yaml:
       overlays:
         - kueyen
+  - name: ayekan
+    clusterName: ayekan
+    yaml:
+      overlays:
+        - ayekan

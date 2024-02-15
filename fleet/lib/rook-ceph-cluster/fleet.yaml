@@ -16,9 +16,9 @@ dependsOn:
   - selector:
       matchLabels:
         bundle: ingress-nginx
-  - selector:
-      matchLabels:
-        bundle: kube-prometheus-stack
+  #- selector:
+  #    matchLabels:
+  #      bundle: kube-prometheus-stack
   - selector:
       matchLabels:
         bundle: cert-manager-conf
@@ -43,6 +43,9 @@ diff:
         - /spec/skipUpgradeChecks
         - /spec/crashCollector/disable
         - /spec/monitoring/enabled
+        - /spec/dashboard/ssl
+        - /spec/disruptionManagement/manageMachineDisruptionBudgets
+        - /spec/storage/useAllNodes
 targetCustomizations:
   - name: kueyen
     clusterName: kueyen
@@ -54,3 +57,8 @@ targetCustomizations:
     helm:
       valuesFiles:
         - overlays/namkueyen/values.yaml
+  - name: ayekan
+    clusterName: ayekan
+    helm:
+      valuesFiles:
+        - overlays/ayekan/values.yaml
