@@ -12,6 +12,7 @@ spec:
     - fleet/lib/cert-manager*
     - fleet/lib/external-secrets*
     - fleet/lib/metallb*
+    - fleet/lib/ingress-nginx*
   targets:
     - name: ayekan
       clusterName: ayekan

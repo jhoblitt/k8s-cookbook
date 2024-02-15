@@ -40,7 +40,7 @@ targetCustomizations:
         controller:
           service:
             annotations:
-              metallb.universe.tf/loadBalancerIPs: 139.229.144.39
+              metallb.universe.tf/address-pool: ingress
   - name: namkueyen
     clusterName: namkueyen
     helm:
