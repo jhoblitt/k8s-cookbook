@@ -6,7 +6,7 @@ metadata:
   namespace: fleet-default
 spec:
   repo: https://github.com/lsst-it/k8s-cookbook
-  branch: master
+  branch: IT-3442/jhoblitt-test1
   keepResources: true
   paths:
     - fleet/lib/cert-manager-crds
