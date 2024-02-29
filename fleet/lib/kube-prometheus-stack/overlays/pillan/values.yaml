@@ -1,0 +1,247 @@
+---
+prometheus:
+  prometheusSpec:
+    scrapeInterval: 15s
+    externalUrl: https://prometheus.pillan.tu.lsst.org
+    serviceMonitorNamespaceSelector:
+      matchLabels:
+        o11y.eu/monitor: enabled
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelector: {}
+    podMonitorNamespaceSelector:
+      matchLabels:
+        o11y.eu/monitor: enabled
+    podMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelector: {}
+    configMaps:
+      - prometheus-snmp-csv-network
+    remoteWrite:
+      - url: http://mimir-distributed-gateway.mimir:80/api/v1/push
+    additionalScrapeConfigs:
+      - job_name: blackbox-ping-tu
+        metrics_path: /probe
+        params:
+          module: [icmp]
+        puppetdb_sd_configs:
+          - url: http://puppetdb.tu.lsst.org:8080
+            query: "resources { type = \"Class\" and title = \"Prometheus::Node_exporter\" }"
+            refresh_interval: 30s
+            follow_redirects: true
+            include_parameters: true
+            enable_http2: true
+        relabel_configs:
+          - source_labels: [__meta_puppetdb_certname]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: blackbox-exporter-prometheus-blackbox-exporter.monitoring:9115
+      - job_name: snmp-csv-network
+        metrics_path: /snmp
+        params:
+          module: [if_mib]
+        file_sd_configs:
+          - files:
+              - /etc/prometheus/configmaps/prometheus-snmp-csv-network/snmp-csv-network.json
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__meta_hostname]
+            target_label: instance
+          - source_labels: [__meta_network_function]
+            target_label: network_function
+          - target_label: __address__
+            replacement: snmp-exporter-prometheus-snmp-exporter.monitoring:9116
+      - job_name: blackbox-csv-network
+        metrics_path: /probe
+        params:
+          module: [icmp]
+        file_sd_configs:
+          - files:
+              - /etc/prometheus/configmaps/prometheus-snmp-csv-network/snmp-csv-network.json
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__meta_hostname]
+            target_label: instance
+          - source_labels: [__meta_network_function]
+            target_label: network_function
+          - target_label: __address__
+            replacement: blackbox-exporter-prometheus-blackbox-exporter.monitoring:9115
+      - job_name: snmp-raritan-pdu
+        metrics_path: /snmp
+        params:
+          module: [raritan]
+        file_sd_configs:
+          - files:
+              - /etc/prometheus/configmaps/pdu-targets/pdu-targets.json
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__meta_hostname]
+            target_label: instance
+          - target_label: __address__
+            replacement: snmp-exporter-prometheus-snmp-exporter.monitoring:9116
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/backend-protocol: HTTP
+      nginx.ingress.kubernetes.io/server-snippet: |
+        proxy_ssl_verify off;
+    paths:
+      - /
+    pathType: Prefix
+    hosts:
+      - prometheus.pillan.tu.lsst.org
+    tls:
+      - secretName: tls-prometheus-ingress
+        hosts:
+          - prometheus.pillan.tu.lsst.org
+
+alertmanager:
+  alertmanagerSpec:
+    externalUrl: https://alertmanager.pillan.tu.lsst.org
+    secrets:
+      - o11y-webhooks
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/backend-protocol: HTTP
+      nginx.ingress.kubernetes.io/server-snippet: |
+        proxy_ssl_verify off;
+    paths:
+      - /
+    pathType: Prefix
+    hosts:
+      - alertmanager.pillan.tu.lsst.org
+    tls:
+      - secretName: tls-alertmanager-ingress
+        hosts:
+          - alertmanager.pillan.tu.lsst.org
+  config:
+    global:
+      resolve_timeout: 5m
+      slack_api_url_file: /etc/alertmanager/secrets/o11y-webhooks/o11y-slack
+    route:
+      group_by: ["namespace", "cluster"]
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 24h
+      receiver: slack-test
+      routes:
+        - receiver: "null"
+          matchers:
+            - alertname = "InfoInhibitor"
+        - receiver: watchdog
+          matchers:
+            - alertname = "Watchdog"
+        - receiver: squadcast-test
+          matchers:
+            - receiver =~ ".*,squadcast,.*"
+          continue: true
+    receivers:
+      - name: "null"
+      - name: watchdog
+      - name: slack-test
+        slack_configs:
+          - username: pillan-prometheus
+            channel: "#rubinobs-monitoring-test"
+            send_resolved: true
+      - name: squadcast-test
+        webhook_configs:
+          - url_file: /etc/alertmanger/secrets/o11y-webhooks/o11y-squadcast
+    inhibit_rules:
+      - source_matchers:
+          - alertname = "InfoInhibitor"
+        target_matchers:
+          - severity = "info"
+        equal: ["namespace"]
+      - source_matchers:
+          - severity = "critical"
+        target_matchers:
+          - severity =~ "info|warning"
+        equal: ["alertname"]
+      - source_matchers:
+          - severity = "warning"
+        target_matchers:
+          - severity = "info"
+        equal: ["alertname"]
+    templates:
+      - "/etc/alertmanager/config/*.tmpl"
+
+grafana:
+  persistence:
+    enabled: true
+  deploymentStrategy:
+    type: Recreate  # default is RollingUpdate, which doesn't work w/ persistence enabled
+  grafana.ini:
+    auth.ldap:
+      enabled: true
+      allow_sign_up: true
+      config_file: /etc/grafana/ldap.toml
+  ldap:
+    enabled: true
+    existingSecret: grafana-ldap
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/backend-protocol: HTTP
+      nginx.ingress.kubernetes.io/server-snippet: |
+        proxy_ssl_verify off;
+    paths:
+      - /
+    pathType: Prefix
+    hosts:
+      - grafana.tu.lsst.org
+    tls:
+      - secretName: tls-grafana-ingress
+        hosts:
+          - grafana.tu.lsst.org
+  sidecar:
+    alerts:
+      enabled: true
+    dashboards:
+      enabled: true
+  datasources:
+    datasource.yaml:
+      apiVersion: 1
+      datasources:
+        - name: Prometheus
+          type: prometheus
+          uid: prometheus
+          url: http://kube-prometheus-stack-prometheus.kube-prometheus-stack:9090/
+          access: proxy
+          jsonData:
+            httpMethod: POST
+            timeInterval: 30s
+        - name: Mimir
+          type: prometheus
+          uid: mimir
+          url: http://mimir-distributed-gateway.mimir:80/prometheus
+          access: proxy
+          isDefault: true
+          jsonData:
+            httpMethod: POST
+            timeInterval: 30s
+        - name: Alertmanager
+          type: alertmanager
+          uid: alertmanager
+          url: http://kube-prometheus-stack-alertmanager.kube-prometheus-stack:9093/
+          access: proxy
+          jsonData:
+            handleGrafanaManagedAlerts: false
+            implementation: prometheus
+
+# these components are not present in the Rancher clusters
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+kubeControllerManager:
+  enabled: false

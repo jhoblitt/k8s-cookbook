@@ -51,3 +51,9 @@ targetCustomizations:
           prometheusSpec:
             remoteWrite:
               - url: https://mimir.o11y.dev.lsst.org/api/v1/push
+
+  - name: pillan
+    clusterName: pillan
+    helm:
+      valuesFiles:
+        - overlays/pillan/values.yaml
