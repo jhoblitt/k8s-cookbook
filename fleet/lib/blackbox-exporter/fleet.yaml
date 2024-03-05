@@ -1,0 +1,28 @@
+---
+defaultNamespace: &name blackbox-exporter
+labels:
+  bundle: *name
+helm:
+  chart: &chart prometheus-blackbox-exporter
+  releaseName: *chart
+  repo: https://prometheus-community.github.io/helm-charts
+  version: 8.4.0
+  timeoutSeconds: 300
+  waitForJobs: true
+  atomic: false
+dependsOn:
+  - selector:
+      matchLabels:
+        bundle: kube-prometheus-stack
+  # ingress-nginx isn't fleet deployed on pillan
+  #- selector:
+  #   matchLabels:
+  #      bundle: ingress-nginx
+targetCustomizations:
+  - name: tu
+    clusterSelector:
+      matchLabels:
+        site: tu
+    helm:
+      valuesFiles:
+        - overlays/tu/values.yaml
