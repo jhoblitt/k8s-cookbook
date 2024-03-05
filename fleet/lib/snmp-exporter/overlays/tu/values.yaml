@@ -1,0 +1,55 @@
+---
+image:
+  tag: v0.25.0
+
+replicas: 1
+
+resources:
+  limits:
+    memory: 500Mi
+  requests:
+    memory: 500Mi
+
+serviceMonitor:
+  enabled: true
+
+extraConfigmapMounts:
+  - name: snmp-network-config
+    mountPath: /etc/snmp-exporter/network
+    configMap: snmp-network
+    readOnly: true
+    defaultmode: 420
+  - name: snmp-power-config
+    mountPath: /etc/snmp-exporter/power
+    configMap: snmp-power
+    readOnly: true
+    defaultmode: 420
+extraSecretMounts:
+  - name: snmp-config
+    mountPath: /etc/snmp-exporter
+    secretName: snmp-config
+    readOnly: true
+    defaultmode: 420
+
+extraArgs:
+  - --config.file
+  - /etc/snmp-exporter/snmp.yaml
+  - --config.file
+  - /etc/snmp-exporter/network/snmp-*.yaml
+  - --config.file
+  - /etc/snmp-exporter/power/snmp-*.yaml
+
+ingress:
+  enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/backend-protocol: HTTP
+    nginx.ingress.kubernetes.io/server-snippet: |
+      proxy_ssl_verify off;
+  hosts:
+    - "snmp-exporter.${ .ClusterName }.${ .ClusterLabels.site }.lsst.org"
+  tls:
+    - secretName: tls-snmp-exporter-ingress
+      hosts:
+        - "snmp-exporter.${ .ClusterName }.${ .ClusterLabels.site }.lsst.org"

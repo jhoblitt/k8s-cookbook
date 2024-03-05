@@ -1,0 +1,31 @@
+---
+defaultNamespace: &name snmp-exporter
+labels:
+  bundle: *name
+helm:
+  chart: &chart prometheus-snmp-exporter
+  releaseName: *chart
+  repo: https://prometheus-community.github.io/helm-charts
+  version: 1.8.1
+  timeoutSeconds: 300
+  waitForJobs: true
+  atomic: false
+dependsOn:
+  - selector:
+      matchLabels:
+        bundle: snmp-exporter-pre
+  - selector:
+      matchLabels:
+        bundle: kube-prometheus-stack
+  # ingress-nginx isn't fleet deployed on pillan
+  #- selector:
+  #   matchLabels:
+  #      bundle: ingress-nginx
+targetCustomizations:
+  - name: tu
+    clusterSelector:
+      matchLabels:
+        site: tu
+    helm:
+      valuesFiles:
+        - overlays/tu/values.yaml

@@ -1,0 +1,13 @@
+---
+defaultNamespace: snmp-exporter
+labels:
+  bundle: &name snmp-exporter-pre
+helm:
+  releaseName: *name
+  timeoutSeconds: 300
+  waitForJobs: true
+  atomic: false
+dependsOn:
+  - selector:
+      matchLabels:
+        bundle: external-secrets-conf
