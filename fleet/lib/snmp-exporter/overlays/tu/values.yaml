@@ -32,6 +32,7 @@ extraSecretMounts:
     defaultmode: 420
 
 extraArgs:
+  - --log.level=debug
   - --config.file
   - /etc/snmp-exporter/snmp.yaml
   - --config.file
