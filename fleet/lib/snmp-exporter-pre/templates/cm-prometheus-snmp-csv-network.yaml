@@ -1,0 +1,9 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-snmp-csv-network
+  namespace: kube-prometheus-stack
+data:
+  snmp-csv-network.json: |
+{{ .Files.Get "files/snmp-switches.json" | indent 4}}

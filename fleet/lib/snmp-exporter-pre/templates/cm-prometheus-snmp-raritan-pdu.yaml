@@ -1,0 +1,9 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-snmp-raritan-pdu
+  namespace: kube-prometheus-stack
+data:
+  snmp-raritan-pdu.json: |
+{{ .Files.Get "files/snmp-raritan-pdu.json" | indent 4}}

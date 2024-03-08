@@ -14,14 +14,14 @@ serviceMonitor:
   enabled: true
 
 extraConfigmapMounts:
-  - name: snmp-network-config
-    mountPath: /etc/snmp-exporter/network
+  - name: snmp-network
+    mountPath: /etc/snmp-exporter/snmp-network
     configMap: snmp-network
     readOnly: true
     defaultmode: 420
-  - name: snmp-power-config
-    mountPath: /etc/snmp-exporter/power
-    configMap: snmp-power
+  - name: snmp-raritan
+    mountPath: /etc/snmp-exporter/snmp-raritan
+    configMap: snmp-raritan
     readOnly: true
     defaultmode: 420
 extraSecretMounts:
@@ -35,9 +35,9 @@ extraArgs:
   - --config.file
   - /etc/snmp-exporter/snmp.yaml
   - --config.file
-  - /etc/snmp-exporter/network/snmp-*.yaml
+  - /etc/snmp-exporter/snmp-network/*.yaml
   - --config.file
-  - /etc/snmp-exporter/power/snmp-*.yaml
+  - /etc/snmp-exporter/snmp-raritan/*.yaml
 
 ingress:
   enabled: true
